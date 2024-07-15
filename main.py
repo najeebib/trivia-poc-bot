@@ -8,7 +8,33 @@ import html
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 BOT_USERNAME = '@MyTriviaGameBot'
-CATEGORIES = ["animals", "sports", "geography", "history", "art", "books", "television", "film", "random"]
+categories = {
+    1: "Random",
+    2: "General Knowledge",
+    3: "Entertainment: Books",
+    4: "Entertainment: Film",
+    5: "Entertainment: Music",
+    6: "Entertainment: Musicals & Theatres",
+    7: "Entertainment: Television",
+    8: "Entertainment: Video Games",
+    9: "Entertainment: Board Games",
+    10: "Science & Nature",
+    11: "Science: Computers",
+    12: "Science: Mathematics",
+    13: "Mythology",
+    14: "Sports",
+    15: "Geography",
+    16: "History",
+    17: "Politics",
+    18: "Art",
+    19: "Celebrities",
+    20: "Animals",
+    21: "Vehicles",
+    22: "Entertainment: Comics",
+    23: "Science: Gadgets",
+    24: "Entertainment: Japanese Anime & Manga",
+    25: "Entertainment: Cartoon & Animations"
+}
 
 user_questions = {}
 
@@ -18,10 +44,17 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     }
     requests.post("http://localhost:8000/trivia/start", json=data)
     user = update.message.from_user
-    await update.message.reply_text(f"Hello {user.first_name}\nTrivia game started\nType /help for more info")
+    categories_text = ""
+    for key, value in categories.items():
+        categories_text += f"({key}) - {value}\n"
+
+    await update.message.reply_text(f"Hello {user.first_name}\nTrivia game started\nSelect one of the following categories:\n{categories_text}")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f"Send a category and I will give you a trivia question\nList of avialable categories are: {CATEGORIES}")
+    categories_text = ""
+    for key, value in categories.items():
+        categories_text += f"({key}) - {value}\n"
+    await update.message.reply_text(f"Send a category and I will give you a trivia question\nList of avialable categories are:\n{categories_text}")
 
 async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = {
@@ -34,10 +67,10 @@ async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 # Response
 
 def handle_response(text: str) -> str:
-    text = text.lower()
+    category_id = int(text)
 
-    if text in CATEGORIES:
-        response = requests.get(f"http://localhost:8000/trivia/{text}").json()
+    if category_id in categories:
+        response = requests.get(f"http://localhost:8000/trivia/{categories[category_id]}").json()
         question = html.unescape(response["question"])
         correct_answer = response["correct_answer"]  # Assuming your API returns this
         return question, correct_answer
