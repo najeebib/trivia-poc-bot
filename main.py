@@ -82,12 +82,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_id = update.message.from_user.id
 
     if user_id in user_questions:
-        if message.lower() != "true" and message.lower() != "false":
+        if message.lower() != "true" and message.lower() != "false" and message.lower() != "t" and message.lower() != "f":
             await update.message.reply_text("Please enter 'true' or 'false'.")
             return
         correct_answer = user_questions[user_id]['correct_answer']
-        
-        if message.lower() == correct_answer.lower() or (message.lower() == "t" and correct_answer.lower() == "true") or (message.lower() == "f" and correct_answer.lower() == "false"):
+        if message.lower() == 'f':
+            message = "false"
+        if message.lower() == 't':
+            message = "true"
+        if message.lower() == correct_answer.lower():
             await update.message.reply_text("Correct! 🎉")
             data = {
                 "user_id": str(update.message.from_user.id)
