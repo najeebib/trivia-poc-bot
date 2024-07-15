@@ -42,7 +42,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     data = {
         "user_id": str(update.message.from_user.id)
     }
-    requests.post("https://trivia-poc-server.onrender.com//trivia/start", json=data)
+    requests.post("https://trivia-poc-server.onrender.com/trivia/start", json=data)
     user = update.message.from_user
     categories_text = ""
     for key, value in categories.items():
@@ -60,7 +60,7 @@ async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     data = {
         "user_id": str(update.message.from_user.id)
     }
-    response = requests.get("https://trivia-poc-server.onrender.com//trivia/score", json=data).json()
+    response = requests.get("https://trivia-poc-server.onrender.com/trivia/score", json=data).json()
     user = response['user']
     await update.message.reply_text(f"Your score is: {user['score']} points")
 
@@ -70,7 +70,7 @@ def handle_response(text: str) -> str:
     category_id = int(text)
 
     if category_id in categories:
-        response = requests.get(f"https://trivia-poc-server.onrender.com//trivia/{categories[category_id]}").json()
+        response = requests.get(f"https://trivia-poc-server.onrender.com/trivia/{categories[category_id]}").json()
         question = html.unescape(response["question"])
         correct_answer = response["correct_answer"]  # Assuming your API returns this
         return question, correct_answer
@@ -92,7 +92,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             data = {
                 "user_id": str(update.message.from_user.id)
             }
-            requests.post("https://trivia-poc-server.onrender.com//trivia/score", json=data)
+            requests.post("https://trivia-poc-server.onrender.com/trivia/score", json=data)
             del user_questions[user_id]
         else:
             await update.message.reply_text("Incorrect. 😢")
@@ -101,7 +101,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         question, correct_answer = handle_response(message)
         if question:
             user_questions[user_id] = {'question': question, 'correct_answer': correct_answer}
-            await update.message.reply_text(question)
+            await update.message.reply_text(f"True or False: {question}" )
         else:
             await update.message.reply_text("I don't know that category. Please try again. Use /help to see all categories.")
 
