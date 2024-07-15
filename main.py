@@ -101,12 +101,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await update.message.reply_text("Incorrect. 😢")
             del user_questions[user_id]
     else:
-        question, correct_answer = handle_response(message)
-        if question:
-            user_questions[user_id] = {'question': question, 'correct_answer': correct_answer}
-            await update.message.reply_text(f"True or False: {question}" )
+        if message.isnumeric():
+            question, correct_answer = handle_response(message)
+            if question:
+                user_questions[user_id] = {'question': question, 'correct_answer': correct_answer}
+                await update.message.reply_text(f"True or False: {question}" )
+            else:
+                await update.message.reply_text("I don't know that category. Please try again. Use /help to see all categories.")
         else:
-            await update.message.reply_text("I don't know that category. Please try again. Use /help to see all categories.")
+            await update.message.reply_text("Enter a number. Please try again. Use /help to see all categories.")
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print(f"Update {update} caused error {context.error}")
