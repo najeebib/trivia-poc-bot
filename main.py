@@ -72,7 +72,7 @@ def handle_response(text: str) -> str:
     if category_id in categories:
         response = requests.get(f"https://trivia-poc-server.onrender.com/trivia/{categories[category_id]}").json()
         question = html.unescape(response["question"])
-        correct_answer = response["correct_answer"]  # Assuming your API returns this
+        correct_answer = response["correct_answer"]
         return question, correct_answer
     else:
         return None, None
@@ -85,31 +85,35 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         if message.lower() != "true" and message.lower() != "false" and message.lower() != "t" and message.lower() != "f":
             await update.message.reply_text("Please enter 'true' or 'false'.")
             return
+        
         correct_answer = user_questions[user_id]['correct_answer']
+
         if message.lower() == 'f':
             message = "false"
         if message.lower() == 't':
             message = "true"
+
         if message.lower() == correct_answer.lower():
             await update.message.reply_text("Correct! 🎉")
             data = {
                 "user_id": str(update.message.from_user.id)
             }
             requests.post("https://trivia-poc-server.onrender.com/trivia/score", json=data)
-            del user_questions[user_id]
         else:
             await update.message.reply_text("Incorrect. 😢")
-            del user_questions[user_id]
+        del user_questions[user_id]
     else:
-        if message.isnumeric():
-            question, correct_answer = handle_response(message)
-            if question:
-                user_questions[user_id] = {'question': question, 'correct_answer': correct_answer}
-                await update.message.reply_text(f"True or False: {question}" )
-            else:
-                await update.message.reply_text("I don't know that category. Please try again. Use /help to see all categories.")
-        else:
+        if not message.isnumeric():
             await update.message.reply_text("Enter a number. Please try again. Use /help to see all categories.")
+            return
+        
+        question, correct_answer = handle_response(message)
+        if question:
+            user_questions[user_id] = {'question': question, 'correct_answer': correct_answer}
+            await update.message.reply_text(f"True or False: {question}" )
+        else:
+            await update.message.reply_text("I don't know that category. Please try again. Use /help to see all categories.")
+            
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     print(f"Update {update} caused error {context.error}")
